@@ -6,6 +6,7 @@ from fastapi import APIRouter, HTTPException
 from typing import Dict, Any
 
 from ..database import teachers_collection, verify_password
+from ..session import create_session, validate_session
 
 router = APIRouter(
     prefix="/auth",
@@ -24,17 +25,24 @@ def login(username: str, password: str) -> Dict[str, Any]:
         raise HTTPException(
             status_code=401, detail="Invalid username or password")
 
+    session_info = create_session(teacher["username"])
+
     # Return teacher information (excluding password)
     return {
         "username": teacher["username"],
         "display_name": teacher["display_name"],
-        "role": teacher["role"]
+        "role": teacher["role"],
+        "session_token": session_info["session_token"],
+        "session_expires_at": session_info["expires_at"],
     }
 
 
 @router.get("/check-session")
-def check_session(username: str) -> Dict[str, Any]:
+def check_session(username: str, session_token: str) -> Dict[str, Any]:
     """Check if a session is valid by username"""
+    if not validate_session(session_token, username):
+        raise HTTPException(status_code=401, detail="Session is invalid or expired")
+
     teacher = teachers_collection.find_one({"_id": username})
 
     if not teacher:
