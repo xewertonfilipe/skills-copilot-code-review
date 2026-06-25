@@ -95,6 +95,14 @@ section h3 {
   font-size: 1.1rem;
 }
 
+.announcement-banner {
+  background-color: #2a612c;
+  color: white;
+  text-align: center;
+  padding: 15px;
+  font-weight: bold;
+}
+
 /* New Layout Styles */
 .main-content-layout {
   display: flex;
